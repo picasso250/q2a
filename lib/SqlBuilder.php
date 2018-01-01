@@ -1,5 +1,6 @@
 <?php
-namespace Lib;
+
+namespace lib;
 
 use Pdo;
 use BadMethodCallException;
@@ -7,7 +8,7 @@ use mysqli;
 
 function _add_quote($key) {
   if (strpos($key, ".")) {
-    return implode(".", array_map("Lib\\_add_quote", explode(".", $key)));
+    return implode(".", array_map("lib\\_add_quote", explode(".", $key)));
   }
   return "`$key`";
 }
@@ -51,7 +52,7 @@ class SqlBuilder
     throw new BadMethodCallException("no method $name");
   }
   public function select(array $fields) {
-    $this->_select = implode(",", array_map("Lib\\_add_quote", $fields));
+    $this->_select = implode(",", array_map("lib\\_add_quote", $fields));
     return $this;
   }
   public function from($from, $as = "") {

@@ -1,5 +1,6 @@
 <?php
-namespace Lib;
+
+namespace lib;
 
 use Pdo;
 

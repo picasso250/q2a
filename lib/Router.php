@@ -1,5 +1,7 @@
 <?php
-namespace Lib;
+
+namespace lib;
+
 /**
  *
  */

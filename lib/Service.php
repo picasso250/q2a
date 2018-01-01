@@ -1,6 +1,6 @@
 <?php
 
-namespace Lib;
+namespace lib;
 
 class Service {
   private static $_pool = [];
