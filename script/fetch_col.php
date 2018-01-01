@@ -1,23 +1,11 @@
 <?php
 
-use lib\BaseModel;
+use lib\Model;
 use lib\MysqlUtil;
+use lib\Curl;
 
-require dirname(__DIR__)."/vendor/autoload.php";
-require (__DIR__)."/odie.php";
-require dirname(__DIR__)."/../zhihu-copy/lib/autoload.php";
-require (__DIR__)."/model.php";
-
-require_once dirname(__DIR__).'/qa-include/qa-base.php';
-require_once QA_INCLUDE_DIR.'qa-app-users.php';
-require_once QA_INCLUDE_DIR.'qa-app-posts.php';
-
-define('BASE_URL', 'https://www.zhihu.com');
-define('IMG_ROOT_URL_OLD', '#https://pic\d+.zhimg.com/#');
-define('IMG_ROOT_URL', 'http://localhost/zhihu/image/');
-
-define('TQ', 1);
-define('TA', 2);
+require (__DIR__)."/init.inc.php";
+Curl::$cache_dir = dirname(__DIR__).'/data/http_get';
 
 $coid = '20430715';
 if (isset($argv[1])) {
@@ -26,7 +14,7 @@ if (isset($argv[1])) {
 $base_url = 'https://www.zhihu.com';
 $url = "$base_url/collection/$coid";
 echo "fetch $url\n";
-list($code, $content) = odie_get($url);
+list($code, $content) = Curl::get($url);
 // $code = 200; $content = file_get_contents(__DIR__.'/cache/'.urlencode($url));
 // echo "$code\t$content\n";
 if ($code == 404) {
@@ -34,14 +22,7 @@ if ($code == 404) {
     exit(1);
 }
 
-$ini_file = __DIR__."/ENV_VAR.ini";
-if (!file_exists($ini_file)) {
-  echo "no ENV_VAR.ini file\n";
-  exit(1);
-}
-$env_var_list = parse_ini_file($ini_file, true);
-
-BaseModel::$db = $db = qa_db_connection();
+Model::$db = $db = qa_db_connection();
 
 phpQuery::newDocumentHtml($content);
 $n = get_page_num();
@@ -55,7 +36,7 @@ $answer_list = [];
 for ($i=1; $i <= $n; $i++) {
   $purl = "$url?page=$i";
   echo "$purl\n";
-  list($code, $content) = odie_get($purl);
+  list($code, $content) = Curl::get($purl);
   if ($code != 200) {
     echo "bad http code $code\n";
     exit(1);
@@ -136,7 +117,7 @@ foreach ($answer_list as $answer) {
       ]);
       if (!$ok) {
         echo "sql error\n";
-        var_dump($sqlb->stmt->errorInfo());
+        var_dump(ZhiHuFetch::$_sqlb->stmt->errno);
         exit(1);
       }
       $zqid = $db->insert_id;
@@ -175,30 +156,7 @@ foreach ($answer_list as $answer) {
       }
     }
 
-    $data = [
-      'parentid' => $pqid,
-      'userid' => $userid,
-      'content' => preg_replace(IMG_ROOT_URL_OLD, IMG_ROOT_URL, $html),
-      'updated' => $answer->date,
-    ];
-    $ok = Post::addAnswer($data);
-    if (!$ok) {
-      var_dump($ok);
-      echo Post::db()->errno,"\t",Post::db()->error,PHP_EOL;
-      exit(1);
-      echo "sql error\n";
-      print_r($data);
-      echo strlen($data['content']),PHP_EOL;
-      $errorInfo = $sqlb->stmt->errorInfo();
-      if ($errorInfo[0] === 'HY000' && $errorInfo[1] == 1366) {
-        // Incorrect string value
-        print_r($errorInfo);
-      } else {
-        print_r($errorInfo);
-        exit(1);
-      }
-    }
-    $paid = $db->insert_id;
+    $paid = 0;
 
     $zaid = ZhiHuFetch::addAnswer([
       'postid' => $paid,
@@ -206,16 +164,11 @@ foreach ($answer_list as $answer) {
       'qid' => $qid,
       'aid' => $aid,
       'edit_time' => $answer->date,
+      'state' => 0,
     ]);
     $zaid = $db->insert_id;
     echo "save answer $zaid => $paid\n";
 
-    $acount = Post::sqlBuilder()->where([
-      ['type','A'],
-      ['parentid',$pqid],
-    ])->count();
-    echo "$pqid answer count $acount\n";
-    Post::sqlBuilder()->where([['postid',$pqid]])->update(['acount'=>$acount]);
     $db->commit();
 
     fwrite($f, "<strong>$author_name</strong> <a href='$base_url$entry_url'>$base_url$entry_url</a><br>\n");
@@ -242,11 +195,11 @@ function get_page_num() {
 function get_question($qid) {
   $url = BASE_URL.'/question/'.$qid;
   echo "curl $url\n";
-  list($code, $content) = odie_get($url);
+  list($code, $content) = Curl::get($url);
   if ($code == 28) {
     echo "retry\n";
     sleep(20);
-    list($code, $content) = odie_get($url);
+    list($code, $content) = Curl::get($url);
   }
   if ($code != 200) {
     echo "bad code $code $content\n";
