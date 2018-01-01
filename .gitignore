@@ -1,1 +1,4 @@
 /data/
+/question2answer/
+*.log
+/vendor/
