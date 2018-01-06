@@ -5,6 +5,7 @@ namespace lib;
 use Pdo;
 use BadMethodCallException;
 use mysqli;
+use InvalidArgumentException;
 
 function _add_quote($key) {
   if (strpos($key, ".")) {
@@ -75,9 +76,19 @@ class SqlBuilder
     }
     return "$key";
   }
+  public function _str_where_to_array($where) {
+    if (preg_match("/^(.+?)\s*(=|<=|<>|>=|!=|like)\s*(.+)/", $where, $m)) {
+      array_shift($m);
+      return $m;
+    }
+    throw new InvalidArgumentException("where ".$where);
+  }
   public function where(array $where) {
     $where_str_arr = $where_params = [];
     foreach ($where as $w) {
+      if (is_string($w)) {
+        $w = self::_str_where_to_array($w);
+      }
       $key = self::_trim_table($w[0]);
       if (count($w) == 2) {
         $where_str_arr[] = _add_quote($w[0])."=:".$key;
@@ -95,6 +106,9 @@ class SqlBuilder
   public function having(array $where) {
     $where_str_arr = $where_params = [];
     foreach ($where as $w) {
+      if (is_string($w)) {
+        $w = self::_str_where_to_array($w);
+      }
       if (count($w) == 2) {
         $where_str_arr[] = _add_quote($w[0])."=:$w[0]";
         $where_params[] = $w[1];
