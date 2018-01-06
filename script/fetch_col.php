@@ -58,7 +58,7 @@ for ($i=1; $i <= $n; $i++) {
           if (preg_match("#/question/(\d+)/answer/(\d+)#", $entry_url, $m)) {
             $qid = $m[1];
             $aid = $m[2];
-            if (!ZhiHuFetch::getAnswerOne([ ['aid',$aid], ['qid',$qid] ])) {
+            if (!ZhihuFetch::getAnswerOne([ ['aid',$aid], ['qid',$qid] ])) {
               $html = html_entity_decode(pq($e)->find('textarea')->eq(0)->html());
               echo "Author:",$author_name,"\tUrl: ",$entry_url,PHP_EOL;
               $r->author_name = $author_name;
@@ -93,7 +93,7 @@ foreach ($answer_list as $answer) {
     $entry_content_list[] = $html;
     echo "save html for $entry_url ...\n";
     list($title, $detail) = get_question($qid);
-    $zq = ZhiHuFetch::getQuestionOne([ ['qid',$qid] ]);
+    $zq = ZhihuFetch::getQuestionOne([ ['qid',$qid] ]);
     if (!$zq) {
       $entry_content_list[] = $detail;
 
@@ -109,15 +109,17 @@ foreach ($answer_list as $answer) {
       ]);
       echo "add Q=$pqid\n";
 
-      $ok = ZhiHuFetch::addQuestion([
+      $ok = ZhihuFetch::addQuestion([
         'postid' => $pqid,
         'title' => $title,
         'detail' => $detail,
         'qid' => $qid,
+        "username" => "",
       ]);
       if (!$ok) {
-        echo "sql error\n";
-        var_dump(ZhiHuFetch::$_sqlb->stmt->errno);
+        echo "addQuestion sql error\n";
+        echo ZhihuFetch::$_sqlb->sql,"\n";
+        var_dump(ZhihuFetch::$_sqlb->stmt->errno);
         exit(1);
       }
       $zqid = $db->insert_id;
@@ -158,13 +160,14 @@ foreach ($answer_list as $answer) {
 
     $paid = 0;
 
-    $zaid = ZhiHuFetch::addAnswer([
+    $zaid = ZhihuFetch::addAnswer([
       'postid' => $paid,
       'detail' => $html,
       'qid' => $qid,
       'aid' => $aid,
       'edit_time' => $answer->date,
       'state' => 0,
+      'username' => $username,
     ]);
     $zaid = $db->insert_id;
     echo "save answer $zaid => $paid\n";
