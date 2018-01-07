@@ -87,7 +87,11 @@ class ZhihuFetch extends Model
     return $ok = $sqlb->insert($d);
   }
 }
-class zhihu_fetch extends ZhihuFetch {}
+class zhihu_fetch extends ZhihuFetch {
+  public static function countByCate($cate) {
+    return self::sqlBuilder()->where(["state=$cate"])->count();
+  }
+}
 
 class ZhihuUser extends Model
 {

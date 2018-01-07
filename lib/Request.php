@@ -16,5 +16,10 @@ class Request {
     }
     return $default;
   }
+  public static function isAjax() {
+    return isset($_GET['ajax'])
+      || (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
+      && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
+  }
 
 }
