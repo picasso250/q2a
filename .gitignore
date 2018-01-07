@@ -1,4 +1,5 @@
 /data/
-/question2answer/
+/question2answer/*
+!/question2answer/zhihu
 *.log
 /vendor/
