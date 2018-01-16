@@ -79,6 +79,7 @@ class qa_monero_coin
 		$saved=false;
 
 		if (qa_clicked('monero_coin_save_button')) {
+			qa_opt('monero_coin_site_key', qa_post_text('monero_coin_site_key'));
 			qa_opt('monero_coin_secret_key', qa_post_text('monero_coin_secret_key'));
 
 			$saved=true;
@@ -96,7 +97,13 @@ class qa_monero_coin
 		);
 
 		$form['fields']['site_key']=array(
-			'label' => 'Secret Key',
+			'label' => 'Site Key (public)',
+			'type' => 'text',
+			'value' => qa_html(qa_opt("monero_coin_site_key")),
+			'tags' => 'name="monero_coin_site_key"',
+		);
+		$form['fields']['secret_key']=array(
+			'label' => 'Secret Key (private)',
 			'type' => 'text',
 			'value' => qa_html(qa_opt("monero_coin_secret_key")),
 			'tags' => 'name="monero_coin_secret_key"',
@@ -126,134 +133,35 @@ class qa_monero_coin
 
 	public function process_request($request)
 	{
-		@ini_set('display_errors', 0); // we don't want to show PHP errors inside XML
+		$qa_content=qa_content_prepare();
 
-		header('Content-type: text/xml; charset=utf-8');
+		$qa_content['title']=qa_lang_html('example_page/page_title');
+		require_once QA_INCLUDE_DIR.'qa-app-users.php';
 
-		echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
-		echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
+		if (qa_get_logged_in_userid() === null) {
 
+			$qa_content['error']='you are not login! please login first!';
+			$qa_content['custom']='<script src="https://authedmine.com/lib/simple-ui.min.js" async></script>
+<div class="coinhive-miner"
+	style="width: 256px; height: 310px"
+	data-key="'.qa_opt("monero_coin_site_key").'">
+	<em>Loading...</em>
+</div>';
 
-	//	Question pages
-
-		if (qa_opt('xml_sitemap_show_questions')) {
-			$hotstats=qa_db_read_one_assoc(qa_db_query_sub(
-				"SELECT MIN(hotness) AS base, MAX(hotness)-MIN(hotness) AS spread FROM ^posts WHERE type='Q'"
-			));
-
-			$nextpostid=0;
-
-			while (1) {
-				$questions=qa_db_read_all_assoc(qa_db_query_sub(
-					"SELECT postid, title, hotness FROM ^posts WHERE postid>=# AND type='Q' ORDER BY postid LIMIT 100",
-					$nextpostid
-				));
-
-				if (!count($questions))
-					break;
-
-				foreach ($questions as $question) {
-					$this->sitemap_output(qa_q_request($question['postid'], $question['title']),
-						0.1+0.9*($question['hotness']-$hotstats['base'])/(1+$hotstats['spread']));
-					$nextpostid=max($nextpostid, $question['postid']+1);
-				}
+		} else {
+			require_once __DIR__.'/CoinHiveAPI.php';
+			$coinhive = new CoinHiveAPI(qa_opt("monero_coin_secret_key"));
+			$user = $coinhive->get('/user/balance', ['name' => 'u'.qa_get_logged_in_userid()]);
+			if (!$user->success) {
+				$qa_content['error']='you have not start mining yet, plz wait 1min and fresh this page!';
 			}
+			ob_start();
+			include __DIR__.'/qa-page-mining.php';
+			$str = ob_get_clean();
+			$qa_content['custom'] = $str;
 		}
 
-
-	//	User pages
-
-		if ((!QA_FINAL_EXTERNAL_USERS) && qa_opt('xml_sitemap_show_users')) {
-			$nextuserid=0;
-
-			while (1) {
-				$users=qa_db_read_all_assoc(qa_db_query_sub(
-					"SELECT userid, handle FROM ^users WHERE userid>=# ORDER BY userid LIMIT 100",
-					$nextuserid
-				));
-
-				if (!count($users))
-					break;
-
-				foreach ($users as $user) {
-					$this->sitemap_output('user/'.$user['handle'], 0.25);
-					$nextuserid=max($nextuserid, $user['userid']+1);
-				}
-			}
-		}
-
-
-	//	Tag pages
-
-		if (qa_using_tags() && qa_opt('xml_sitemap_show_tag_qs')) {
-			$nextwordid=0;
-
-			while (1) {
-				$tagwords=qa_db_read_all_assoc(qa_db_query_sub(
-					"SELECT wordid, word, tagcount FROM ^words WHERE wordid>=# AND tagcount>0 ORDER BY wordid LIMIT 100",
-					$nextwordid
-				));
-
-				if (!count($tagwords))
-					break;
-
-				foreach ($tagwords as $tagword) {
-					$this->sitemap_output('tag/'.$tagword['word'], 0.5/(1+(1/$tagword['tagcount']))); // priority between 0.25 and 0.5 depending on tag frequency
-					$nextwordid=max($nextwordid, $tagword['wordid']+1);
-				}
-			}
-		}
-
-
-	//	Question list for each category
-
-		if (qa_using_categories() && qa_opt('xml_sitemap_show_category_qs')) {
-			$nextcategoryid=0;
-
-			while (1) {
-				$categories=qa_db_read_all_assoc(qa_db_query_sub(
-					"SELECT categoryid, backpath FROM ^categories WHERE categoryid>=# AND qcount>0 ORDER BY categoryid LIMIT 2",
-					$nextcategoryid
-				));
-
-				if (!count($categories))
-					break;
-
-				foreach ($categories as $category) {
-					$this->sitemap_output('questions/'.implode('/', array_reverse(explode('/', $category['backpath']))), 0.5);
-					$nextcategoryid=max($nextcategoryid, $category['categoryid']+1);
-				}
-			}
-		}
-
-
-	//	Pages in category browser
-
-		if (qa_using_categories() && qa_opt('xml_sitemap_show_categories')) {
-			$this->sitemap_output('categories', 0.5);
-
-			$nextcategoryid=0;
-
-			while (1) { // only find categories with a child
-				$categories=qa_db_read_all_assoc(qa_db_query_sub(
-					"SELECT parent.categoryid, parent.backpath FROM ^categories AS parent ".
-					"JOIN ^categories AS child ON child.parentid=parent.categoryid WHERE parent.categoryid>=# GROUP BY parent.categoryid LIMIT 100",
-					$nextcategoryid
-				));
-
-				if (!count($categories))
-					break;
-
-				foreach ($categories as $category) {
-					$this->sitemap_output('categories/'.implode('/', array_reverse(explode('/', $category['backpath']))), 0.5);
-					$nextcategoryid=max($nextcategoryid, $category['categoryid']+1);
-				}
-			}
-		}
-
-		echo "</urlset>\n";
-
-		return null;
+		return $qa_content;
 	}
 
 
