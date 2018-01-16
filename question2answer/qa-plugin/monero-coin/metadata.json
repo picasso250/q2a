@@ -1,0 +1,10 @@
+{
+	"name": "Monero Coin",
+	"description": "Mining Monero Coin, and use it to vote",
+	"version": "0.0.1",
+	"date": "2018-01-16",
+	"author": "picasso250",
+	"author_uri": "http://picasso250.github.io/",
+	"license": "GPLv3",
+	"min_q2a": "1.5"
+}
