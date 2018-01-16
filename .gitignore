@@ -1,5 +1,10 @@
 /data/
+
 /question2answer/*
 !/question2answer/zhihu
+!/question2answer/qa-plugin
+/question2answer/qa-plugin/*
+!/question2answer/qa-plugin/monero*
+
 *.log
 /vendor/
