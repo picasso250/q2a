@@ -54,6 +54,9 @@
               <?= htmlspecialchars($cate_name) ?>
             </button>
           <?php } endforeach; ?>
+          <?php if ($entry['state'] == zhihu_fetch::STATE_NOT_PROC): ?>
+            <a href="javascript:void(0)" onclick="send_msg('<?= $entry['username'] ?>')">给作者发请求转载私信</a>
+          <?php endif; ?>
         </td>
       </tr>
     <?php endforeach; ?>

@@ -88,6 +88,11 @@ class ZhihuFetch extends Model
   }
 }
 class zhihu_fetch extends ZhihuFetch {
+  const STATE_NOT_PROC = 0;
+  const STATE_WAIT_REPLY = 1;
+  const STATE_HAVE_REPUB = 2;
+  const STATE_ABANDON = 3;
+  const STATE_AUTHOR_REFUSE = 4;
   public static function countByCate($cate) {
     return self::sqlBuilder()->where(["state=$cate"])->count();
   }
