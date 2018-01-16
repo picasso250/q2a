@@ -4,6 +4,8 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
 	exit;
 }
 ?>
+
+<?php if ($user->success): ?>
 <div class="">
   name: <?php echo $user->name ?>
 </div>
@@ -16,6 +18,7 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
 <div class="">
   balance: <?php echo $user->balance ?> H
 </div>
+<?php endif ?>
 
 <h3>You are mining...</h3>
 <div >hashesPerSecond: <span id="hashesPerSecond"></span></div>
