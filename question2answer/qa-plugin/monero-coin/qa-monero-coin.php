@@ -173,12 +173,24 @@ ENGINE=InnoDB
 
 		} else {
 			$us = $this->ensure_user_spend_row(qa_get_logged_in_userid());
+			$error_vote_spend = '';
+			$error_throttle = '';
 			if (qa_post_text('my_monero_vote_spend')) {
-				$data = array(
-					'monero_vote_spend' => intval(qa_post_text('my_monero_vote_spend')),
-					'monero_coin_throttle' => qa_post_text('my_monero_mining_throttle'),
-				);
-				$this->update_user_spend(qa_get_logged_in_userid(), $data);
+				$data = array();
+				$my_monero_vote_spend = intval(qa_post_text('my_monero_vote_spend'));
+				if (!($my_monero_vote_spend >= intval(qa_opt("monero_coin_exchange_ratio")))) {
+					$error_vote_spend = "vote spend must great than or equal to ".intval(qa_opt("monero_coin_exchange_ratio"));
+				} else {
+					$data['monero_vote_spend'] = $my_monero_vote_spend;
+				}
+				$mining_throttle = floatval(qa_post_text('my_monero_mining_throttle'));
+				if ($mining_throttle < 0 || $mining_throttle > 1) {
+					$error_vote_spend = "mining throttle must between 0 and 1";
+				} else {
+					$data['monero_coin_throttle'] = $mining_throttle;
+				}
+				if ($data)
+					$this->update_user_spend(qa_get_logged_in_userid(), $data);
 			}
 			$us = $this->get_user_spend(qa_get_logged_in_userid());
 			$qa_content['form'] = array(
@@ -188,20 +200,20 @@ ENGINE=InnoDB
 	
 				'ok' => qa_post_text('my_monero_vote_spend') ? 'Saved!' : null,
 	
-				'title' => 'Form title',
+				'title' => 'Monero Settings',
 	
 				'fields' => array(
 					'my_monero_vote_spend' => array(
 						'label' => 'Hash Spent each time you vote(No less than '.intval(qa_opt("monero_coin_exchange_ratio")).')',
 						'tags' => 'name="my_monero_vote_spend"',
 						'value' => qa_html($us['monero_vote_spend']),
-						// 'error' => qa_html('Another error'),
+						'error' => qa_html($error_vote_spend),
 					),
 					'my_monero_mining_throttle' => array(
 						'label' => 'CPU throttle when mining',
 						'tags' => 'name="my_monero_mining_throttle"',
 						'value' => qa_html($us['monero_coin_throttle']),
-						// 'error' => qa_html('Another error'),
+						'error' => qa_html($error_throttle),
 					),
 				),
 				'buttons' => array(
