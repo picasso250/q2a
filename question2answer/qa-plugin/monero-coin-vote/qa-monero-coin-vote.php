@@ -194,34 +194,41 @@ ENGINE=InnoDB";
 		$res = qa_db_query_sub($sql, $userid);
 		$row = qa_db_read_one_assoc($res);
 		$sql = "INSERT INTO ^user_monero_spend
-			(userid,monero_spend,first_spend_time,last_spend_time,balance_cache,balance_cache_time)
+			(userid,monero_spend,first_spend_time,last_spend_time,monero_vote_spend,balance_cache,balance_cache_time)
 			VALUES
-			($,$,$,$,$,$)
+			($,$,$,$,$,$,$)
 			ON DUPLICATE KEY UPDATE
 			monero_spend=$,last_spend_time=$
 			";
 		$now = date('Y-m-d H:i:s');
 		$res = qa_db_query_sub($sql,
-			$userid, $row['s'], $now, $now,0,$now,
+			$userid, $row['s'], $now, $now, self::get_taken(), 0, $now,
 			$row['s'], $now);
 	}
+
 	private function set_cache($userid, $balance) {
 		$sql = "INSERT INTO ^user_monero_spend
-			(userid,monero_spend,first_spend_time,last_spend_time,balance_cache,balance_cache_time)
+			(userid,monero_spend,first_spend_time,last_spend_time,monero_vote_spend,balance_cache,balance_cache_time)
 			VALUES
-			($,$,$,$,$,$)
+			($,$,$,$,$,$,$)
 			ON DUPLICATE KEY UPDATE
-			monero_spend=$,last_spend_time=$";
+			balance_cache=$,last_spend_time=$";
 		$now = date('Y-m-d H:i:s');
 		$res = qa_db_query_sub($sql,
-			$userid, 0, $now, $now,$balance,$now,
-			0, $now);
+			$userid, 0, $now, $now, self::get_taken(), $balance, $now,
+			$balance, $now);
 	}
-	private function get_balance_cache($userid) {
-		$sql = "SELECT balance_cache FROM ^user_monero_spend
+	private function get_user_spend_col($userid, $col) {
+		$sql = "SELECT $col FROM ^user_monero_spend
 			WHERE userid=$ ";
 		$res = qa_db_query_sub($sql, $userid);
-		return intval(qa_db_read_one_value($res, true));
+		return (qa_db_read_one_value($res, true));
+	}
+	private function get_monero_vote_spend($userid) {
+		return intval($this->get_user_spend_col($userid, 'monero_vote_spend'));
+	}
+	private function get_balance_cache($userid) {
+		return intval($this->get_user_spend_col($userid, 'balance_cache'));
 	}
 	private function get_balance($userid) {
 		static $balance;
@@ -242,7 +249,7 @@ ENGINE=InnoDB";
 		return $balance;
 	}
 	public static function get_taken($event, $userid) {
-		return 100;
+		return intval(qa_opt("monero_coin_exchange_ratio"));
 	}
 
 	public function process_event($event, $userid, $handle, $cookieid, $params)

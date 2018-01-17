@@ -36,6 +36,7 @@ class qa_monero_coin
 	`monero_spend` BIGINT(20) UNSIGNED NOT NULL,
 	`first_spend_time` DATETIME NOT NULL,
 	`last_spend_time` DATETIME NOT NULL,
+	`monero_vote_spend` BIGINT(20) NOT NULL,
 	`balance_cache` BIGINT(20) NOT NULL,
 	`balance_cache_time` DATETIME NOT NULL,
 	PRIMARY KEY (`userid`),
@@ -44,7 +45,8 @@ class qa_monero_coin
 	INDEX `monero_spent` (`monero_spend`)
 )
 COLLATE='utf8_general_ci'
-ENGINE=InnoDB";
+ENGINE=InnoDB
+";
 		}
 
 		return $ret;
@@ -71,6 +73,7 @@ ENGINE=InnoDB";
 		if (qa_clicked('monero_coin_save_button')) {
 			qa_opt('monero_coin_site_key', qa_post_text('monero_coin_site_key'));
 			qa_opt('monero_coin_secret_key', qa_post_text('monero_coin_secret_key'));
+			qa_opt('monero_coin_exchange_ratio', intval(qa_post_text('monero_coin_exchange_ratio')));
 
 			$saved=true;
 		}
@@ -98,6 +101,12 @@ ENGINE=InnoDB";
 			'value' => qa_html(qa_opt("monero_coin_secret_key")),
 			'tags' => 'name="monero_coin_secret_key"',
 		);
+		$form['fields']['exchange_ratio']=array(
+			'label' => 'Exchange Ratio (1 Vote = x Hash)',
+			'type' => 'text',
+			'value' => intval(qa_opt("monero_coin_exchange_ratio")),
+			'tags' => 'name="monero_coin_exchange_ratio"',
+		);
 
 		return $form;
 	}
@@ -107,7 +116,7 @@ ENGINE=InnoDB";
 	{
 		return array(
 			array(
-				'title' => 'Monero Coin Mining',
+				'title' => 'Monero Coin',
 				'request' => 'monero-coin-mining',
 				'nav' => 'M', // 'M'=main, 'F'=footer, 'B'=before main, 'O'=opposite main, null=none
 			),
@@ -120,7 +129,34 @@ ENGINE=InnoDB";
 		return preg_match('/monero-coin-mining/', $request);
 	}
 
-
+	public static function get_taken($event, $userid) {
+		return intval(qa_opt("monero_coin_exchange_ratio"));
+	}
+	private function ensure_user_spend($userid) {
+		$sql = "INSERT INTO ^user_monero_spend
+			(userid,monero_spend,first_spend_time,last_spend_time,monero_vote_spend,balance_cache,balance_cache_time)
+			VALUES
+			($,$,$,$,$,$,$)
+			ON DUPLICATE KEY UPDATE
+			userid=$";
+		$now = date('Y-m-d H:i:s');
+		$res = qa_db_query_sub($sql,
+			$userid, 0, $now, $now, self::get_taken('', $userid), 0, $now,
+			$userid);
+	}
+	private function update_user_spend($userid, $data) {
+		$sets = array();
+		foreach ($data as $key => $value) {
+			$sets[] = "`$key`=$";
+		}
+		$setss = implode(',', $sets);
+		$sql = "UPDATE ^user_monero_spend SET $setss
+			WHERE userid=$";
+		$args = array_values($data);
+		array_unshift($args, $sql);
+		array_push($args, $userid);
+		call_user_func_array('qa_db_query_sub', $args);
+	}
 	public function process_request($request)
 	{
 		$qa_content=qa_content_prepare();
@@ -139,9 +175,37 @@ ENGINE=InnoDB";
 </div>';
 
 		} else {
+			$us = $this->ensure_user_spend(qa_get_logged_in_userid());
+			if (qa_post_text('my_monero_vote_spend')) {
+				$this->update_user_spend(qa_get_logged_in_userid(), array('monero_vote_spend' => intval(qa_post_text('my_monero_vote_spend'))));
+			}
+			$us = $this->get_user_spend(qa_get_logged_in_userid());
+			$qa_content['form'] = array(
+				'tags' => 'method="post" action="'.qa_self_html().'"',
+	
+				'style' => 'wide',
+	
+				'ok' => qa_post_text('my_monero_vote_spend') ? 'Saved!' : null,
+	
+				'title' => 'Form title',
+	
+				'fields' => array(
+					'request' => array(
+						'label' => 'Hash Spent each time you vote.(Not less than'.intval(qa_opt("monero_coin_exchange_ratio")).')',
+						'tags' => 'name="my_monero_vote_spend"',
+						'value' => qa_html($us['monero_vote_spend']),
+						// 'error' => qa_html('Another error'),
+					),
+				),
+				'buttons' => array(
+					array(
+						'label' => 'Save Changes',
+						'tags' => 'name="user_monero_coin_save_button"',
+					),
+				),
+			);
 			require_once __DIR__.'/CoinHiveAPI.php';
 			$coinhive = new CoinHiveAPI(qa_opt("monero_coin_secret_key"));
-			$us = $this->get_user_spend(qa_get_logged_in_userid());
 			$user = $coinhive->get('/user/balance', ['name' => 'u'.qa_get_logged_in_userid()]);
 			if (!$user->success) {
 				$qa_content['error']='you have not start mining yet, plz wait 1min and fresh this page!';
