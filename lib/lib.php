@@ -42,3 +42,13 @@ function error2exception()
 {
   set_error_handler("exception_error_handler");
 }
+
+function make_csrf($token_name = '_csrf_token_name')
+{
+  //After the user's login has deemed to be successful.
+
+  //Generate a secure token using openssl_random_pseudo_bytes.
+  $myToken = bin2hex(openssl_random_pseudo_bytes(24));
+  //Store the token as a session variable.
+  $_SESSION[$token_name] = $myToken;
+}
