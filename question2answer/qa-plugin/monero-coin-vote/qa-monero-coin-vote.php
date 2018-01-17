@@ -181,7 +181,7 @@ ENGINE=InnoDB";
 			vote=$,update_time=$
 			";
 		$now = date('Y-m-d H:i:s');
-		$taken = $this->get_taken($event);
+		$taken = self::get_taken($event, $userid);
 		$vote = $this->get_sign($event)*$taken;
 		$res = qa_db_query_sub($sql,
 			$userid, $postid, $taken, $now, $now,
@@ -241,8 +241,8 @@ ENGINE=InnoDB";
 		$this->set_cache($userid, $balance);
 		return $balance;
 	}
-	private function get_taken($event) {
-		return 10;
+	public static function get_taken($event, $userid) {
+		return 100;
 	}
 
 	public function process_event($event, $userid, $handle, $cookieid, $params)
@@ -252,7 +252,7 @@ ENGINE=InnoDB";
 			$db = qa_db_connection();
 			$db->begin_transaction();
 			$balance = $this->get_balance($userid);
-			$taken = $this->get_taken($event);
+			$taken = self::get_taken($event, $userid);
 			if ($balance >= $taken) {
 				$postid = $params['postid'];
 				$this->upsert_vote($event, $userid, $postid);

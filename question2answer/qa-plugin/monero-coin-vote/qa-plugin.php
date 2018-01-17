@@ -41,3 +41,4 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
 
 
 qa_register_plugin_module('event', 'qa-monero-coin-vote.php', 'qa_monero_coin_vote', 'MoneroCoin Vote');
+qa_register_plugin_overrides('qa-vote-set.php');
