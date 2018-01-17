@@ -1,0 +1,10 @@
+{
+	"name": "Monero Coin Vote",
+	"description": "use Monero Coin to vote, dependency inlcude mysqli, Monero Coin Plugin",
+	"version": "1.1.1",
+	"date": "2011-12-06",
+	"author": "picasso250",
+	"author_uri": "http://picasso250.github.io/",
+	"license": "GPLv3",
+	"min_q2a": "1.5"
+}
