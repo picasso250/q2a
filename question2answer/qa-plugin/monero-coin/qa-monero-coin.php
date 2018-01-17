@@ -54,10 +54,6 @@ ENGINE=InnoDB
 	public function option_default($option)
 	{
 		switch ($option) {
-			case 'xml_sitemap_show_questions':
-			case 'xml_sitemap_show_users':
-			case 'xml_sitemap_show_tag_qs':
-			case 'xml_sitemap_show_category_qs':
 			case 'xml_sitemap_show_categories':
 				return true;
 		}
