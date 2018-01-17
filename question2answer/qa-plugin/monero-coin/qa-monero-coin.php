@@ -25,36 +25,26 @@ class qa_monero_coin
 	public function init_queries($table_list)
 	{
 		$ret = array();
-		$tablename=qa_db_add_table_prefix('user_monero_spent');
+		$tablename=qa_db_add_table_prefix('user_monero_spend');
 
 		if (!in_array($tablename, $table_list)) {
 			require_once QA_INCLUDE_DIR.'app/users.php';
 			require_once QA_INCLUDE_DIR.'db/maxima.php';
 
-			$ret[] = 'CREATE TABLE ^user_monero_spent ('.
-				'last_spent_time DATETIME NOT NULL,'.
-				'userid '.qa_get_mysql_user_column_type().','.
-				'monero_spent BIGINT UNSIGNED,'.
-				'KEY datetime (last_spent_time),'.
-				'KEY userid (userid),'.
-				'KEY monero_spent (monero_spent)'.
-			') ENGINE=InnoDB DEFAULT CHARSET=utf8';
-		}
-		$tablename=qa_db_add_table_prefix('user_monero_vote');
-		if (!in_array($tablename, $table_list)) {
-			require_once QA_INCLUDE_DIR.'app/users.php';
-			require_once QA_INCLUDE_DIR.'db/maxima.php';
-
-			$ret[] = 'CREATE TABLE ^user_monero_vote ('.
-				'datetime DATETIME NOT NULL,'.
-				'userid '.qa_get_mysql_user_column_type().','.
-				'postid BIGINT UNSIGNED,'.
-				'monero_vote BIGINT,'.
-				'KEY datetime (datetime),'.
-				'KEY postid (postid),'.
-				'KEY userid (userid),'.
-				'KEY monero_vote (monero_vote)'.
-			') ENGINE=MyISAM DEFAULT CHARSET=utf8';
+			$ret[] = "CREATE TABLE `^user_monero_spend` (
+	`userid` ".qa_get_mysql_user_column_type().",
+	`monero_spend` BIGINT(20) UNSIGNED NOT NULL,
+	`first_spend_time` DATETIME NOT NULL,
+	`last_spend_time` DATETIME NOT NULL,
+	`balance_cache` BIGINT(20) NOT NULL,
+	`balance_cache_time` DATETIME NOT NULL,
+	PRIMARY KEY (`userid`),
+	INDEX `datetime` (`last_spend_time`),
+	INDEX `userid` (`userid`),
+	INDEX `monero_spent` (`monero_spend`)
+)
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB";
 		}
 
 		return $ret;
