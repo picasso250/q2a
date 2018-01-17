@@ -1,5 +1,12 @@
 <?php
 
+function _monero_get_user_spend_col($userid, $col) {
+  $sql = "SELECT $col FROM ^user_monero_spend
+    WHERE userid=$ ";
+  $res = qa_db_query_sub($sql, $userid);
+  return (qa_db_read_one_value($res, true));
+}
+
 function qa_vote_set($post, $userid, $handle, $cookieid, $vote)
 /*
 Actually set (application level) the $vote (-1/0/1) by $userid (with $handle and $cookieid) on $postid.
@@ -13,7 +20,8 @@ Handles user points, recounting and event reports as appropriate.
   require_once QA_INCLUDE_DIR.'db/post-create.php';
   require_once QA_INCLUDE_DIR.'app/limits.php';
 
-  $max = 1;
+  // === customize begin ===
+  $max = intval(_monero_get_user_spend_col($userid, 'monero_vote_spend'));
   $vote *= $max;
   $vote=(int)min(1*$max, max(-1*$max, $vote));
   $oldvote=(int)qa_db_uservote_get($post['postid'], $userid);
@@ -23,6 +31,7 @@ Handles user points, recounting and event reports as appropriate.
     'INSERT INTO ^uservotes (postid, userid, vote, flag) VALUES (#, #, #, 0) ON DUPLICATE KEY UPDATE vote=#',
     $postid, $userid, $vote, $vote
   );
+  // === customize end ===
   qa_db_post_recount_votes($post['postid']);
 
   $postisanswer=($post['basetype']=='A');
