@@ -37,6 +37,7 @@ class qa_monero_coin
 	`first_spend_time` DATETIME NOT NULL,
 	`last_spend_time` DATETIME NOT NULL,
 	`monero_vote_spend` BIGINT(20) NOT NULL,
+	`monero_coin_throttle` DOUBLE NOT NULL,
 	`balance_cache` BIGINT(20) NOT NULL,
 	`balance_cache_time` DATETIME NOT NULL,
 	PRIMARY KEY (`userid`),
@@ -128,16 +129,16 @@ ENGINE=InnoDB
 	public static function get_taken($event, $userid) {
 		return intval(qa_opt("monero_coin_exchange_ratio"));
 	}
-	private function ensure_user_spend($userid) {
+	private function ensure_user_spend_row($userid) {
 		$sql = "INSERT INTO ^user_monero_spend
-			(userid,monero_spend,first_spend_time,last_spend_time,monero_vote_spend,balance_cache,balance_cache_time)
+			(userid,monero_spend,first_spend_time,last_spend_time,monero_vote_spend,monero_coin_throttle,balance_cache,balance_cache_time)
 			VALUES
-			($,$,$,$,$,$,$)
+			($,$,$,$,$,$,$,$)
 			ON DUPLICATE KEY UPDATE
 			userid=$";
 		$now = date('Y-m-d H:i:s');
 		$res = qa_db_query_sub($sql,
-			$userid, 0, $now, $now, self::get_taken('', $userid), 0, $now,
+			$userid, 0, $now, $now, self::get_taken('', $userid), 0.0, 0, $now,
 			$userid);
 	}
 	private function update_user_spend($userid, $data) {
@@ -171,9 +172,13 @@ ENGINE=InnoDB
 </div>';
 
 		} else {
-			$us = $this->ensure_user_spend(qa_get_logged_in_userid());
+			$us = $this->ensure_user_spend_row(qa_get_logged_in_userid());
 			if (qa_post_text('my_monero_vote_spend')) {
-				$this->update_user_spend(qa_get_logged_in_userid(), array('monero_vote_spend' => intval(qa_post_text('my_monero_vote_spend'))));
+				$data = array(
+					'monero_vote_spend' => intval(qa_post_text('my_monero_vote_spend')),
+					'monero_coin_throttle' => qa_post_text('my_monero_mining_throttle'),
+				);
+				$this->update_user_spend(qa_get_logged_in_userid(), $data);
 			}
 			$us = $this->get_user_spend(qa_get_logged_in_userid());
 			$qa_content['form'] = array(
@@ -186,10 +191,16 @@ ENGINE=InnoDB
 				'title' => 'Form title',
 	
 				'fields' => array(
-					'request' => array(
-						'label' => 'Hash Spent each time you vote.(Not less than'.intval(qa_opt("monero_coin_exchange_ratio")).')',
+					'my_monero_vote_spend' => array(
+						'label' => 'Hash Spent each time you vote(No less than '.intval(qa_opt("monero_coin_exchange_ratio")).')',
 						'tags' => 'name="my_monero_vote_spend"',
 						'value' => qa_html($us['monero_vote_spend']),
+						// 'error' => qa_html('Another error'),
+					),
+					'my_monero_mining_throttle' => array(
+						'label' => 'CPU throttle when mining',
+						'tags' => 'name="my_monero_mining_throttle"',
+						'value' => qa_html($us['monero_coin_throttle']),
 						// 'error' => qa_html('Another error'),
 					),
 				),

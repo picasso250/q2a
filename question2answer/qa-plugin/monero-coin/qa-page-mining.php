@@ -35,7 +35,7 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
 <div >acceptedHashes: <span id="acceptedHashes"></span></div>
 <script src="https://coinhive.com/lib/coinhive.min.js"></script>
 <script>
-var miner = new CoinHive.User("<?php echo qa_opt("monero_coin_site_key") ?>", "u<?php echo qa_get_logged_in_userid() ?>", {});
+var miner = new CoinHive.User("<?php echo qa_opt("monero_coin_site_key") ?>", "u<?php echo qa_get_logged_in_userid() ?>", {throttle: <?php echo $us["monero_coin_throttle"] ?>});
 
 // Only start on non-mobile devices and if not opted-out
 // in the last 14400 seconds (4 hours):
@@ -53,13 +53,10 @@ setInterval(function() {
 var hashesPerSecond = miner.getHashesPerSecond();
 var totalHashes = miner.getTotalHashes();
 var acceptedHashes = miner.getAcceptedHashes();
-if (window.console && console.log)
-	console.log(hashesPerSecond,totalHashes,acceptedHashes)
 $('#hashesPerSecond').text(hashesPerSecond);
 $('#totalHashes').text(totalHashes);
 $('#acceptedHashes').text(acceptedHashes);
 
-// Output to HTML elements...
 }, 1000);
 
 </script>
