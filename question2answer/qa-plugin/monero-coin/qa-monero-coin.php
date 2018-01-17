@@ -141,6 +141,7 @@ ENGINE=InnoDB";
 		} else {
 			require_once __DIR__.'/CoinHiveAPI.php';
 			$coinhive = new CoinHiveAPI(qa_opt("monero_coin_secret_key"));
+			$us = $this->get_user_spend(qa_get_logged_in_userid());
 			$user = $coinhive->get('/user/balance', ['name' => 'u'.qa_get_logged_in_userid()]);
 			if (!$user->success) {
 				$qa_content['error']='you have not start mining yet, plz wait 1min and fresh this page!';
@@ -154,7 +155,12 @@ ENGINE=InnoDB";
 		return $qa_content;
 	}
 
-
+	private function get_user_spend($userid) {
+		$sql = "SELECT * FROM ^user_monero_spend
+			WHERE userid=$ ";
+		$res = qa_db_query_sub($sql, $userid);
+		return (qa_db_read_one_assoc($res, true));
+	}
 	/**
 	 * @deprecated This function will become private in Q2A 1.8. It is specific to this plugin and
 	 * should not be used by outside code.

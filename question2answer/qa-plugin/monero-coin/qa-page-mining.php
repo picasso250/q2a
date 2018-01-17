@@ -5,6 +5,7 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
 }
 ?>
 
+<h3>Account</h3>
 <?php if ($user->success): ?>
 <div class="">
   name: <?php echo $user->name ?>
@@ -19,6 +20,14 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
   balance: <?php echo $user->balance ?> H
 </div>
 <?php endif ?>
+
+<h3>Spend</h3>
+<div class="">
+  monero_spend: <?php echo $us ? $us['monero_spend'] : '0' ?> H
+</div>
+<div class="">
+  last_spend_time: <?php echo $us ? $us['last_spend_time'] : '' ?>
+</div>
 
 <h3>You are mining...</h3>
 <div >hashesPerSecond: <span id="hashesPerSecond"></span></div>
