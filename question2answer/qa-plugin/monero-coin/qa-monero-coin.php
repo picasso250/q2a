@@ -37,7 +37,6 @@ class qa_monero_coin
 	`first_spend_time` DATETIME NOT NULL,
 	`last_spend_time` DATETIME NOT NULL,
 	`monero_vote_spend` BIGINT(20) NOT NULL,
-	`monero_coin_throttle` DOUBLE NOT NULL,
 	`balance_cache` BIGINT(20) NOT NULL,
 	`balance_cache_time` DATETIME NOT NULL,
 	PRIMARY KEY (`userid`),
