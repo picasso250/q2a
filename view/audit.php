@@ -17,44 +17,38 @@
   <thead>
     <tr>
       <th scope="col">#</th>
-      <th scope="col">问题</th>
-      <th scope="col">回答</th>
       <th scope="col">回答者</th>
+      <th scope="col">回答数量</th>
       <th scope="col">备注</th>
       <th scope="col">操作(更改状态)</th>
     </tr>
   </thead>
   <tbody>
     <?php foreach ($entry_list as $key => $entry):
-      $q=zhihu_fetch::getQ_byId($entry['qid']);
-      $author_show_name = (zhihu_user::getByName($entry['username'])['showname']);
+      $author = zhihu_user::getByName($entry['username']);
+      $author_show_name = ($author['showname']);
       ?>
       <tr>
         <th scope="row"><?= $key+1 ?></th>
-        <td><?= htmlspecialchars(mb_strimwidth($q['title'], 0, 30, '...')) ?></td>
-        <td>
-          <a href="//zhihu.com/question/<?= htmlspecialchars($entry['qid']) ?>/answer/<?= htmlspecialchars($entry['aid']) ?>" target="_blank">
-            <?= htmlspecialchars(mb_strimwidth(strip_tags($entry['detail']), 0, 60, '...')) ?>
-          </a>
-        </td>
         <td>
           <a href="//zhihu.com/people/<?= htmlspecialchars($entry['username']) ?>" target="_blank">
             <?= htmlspecialchars($author_show_name) ?>
           </a>
         </td>
-        <td><?= htmlspecialchars($entry['remark']) ?></td>
+        <td><?= htmlspecialchars($entry['c']) ?></td>
+        <td><?= htmlspecialchars($author['remark']) ?></td>
         <td>
-          <?php foreach ($cate_list as $cate => $cate_name): if ($cate != $entry['state']) { ?>
+          <?php foreach ($cate_list as $cate => $cate_name): if ($cate != $author['state']) { ?>
             <button type="button" name="button" class="btn btn-outline-primary btn-sm"
               onclick="change_to_state(this, <?= $cate ?>)"
-              data-id="<?= $entry['id'] ?>"
+              data-id="<?= $author['username'] ?>"
               data-q="<?= htmlentities(mb_strimwidth($q['title'], 0, 30, '...')) ?>"
               data-author="<?= htmlentities($author_show_name) ?>"
               >
               <?= htmlspecialchars($cate_name) ?>
             </button>
           <?php } endforeach; ?>
-          <?php if ($entry['state'] == zhihu_fetch::STATE_NOT_PROC): ?>
+          <?php if ($author['state'] == zhihu_fetch::STATE_NOT_PROC): ?>
             <a href="javascript:void(0)" onclick="send_msg('<?= $entry['username'] ?>')">给作者发请求转载私信</a>
           <?php endif; ?>
         </td>

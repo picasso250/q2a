@@ -5,6 +5,7 @@ use lib\MysqlUtil;
 use lib\Task;
 use lib\Request;
 use lib\Response;
+use lib\ErrorLog;
 
 define('PUB_ROOT', dirname(__DIR__));
 define('ROOT', dirname(PUB_ROOT));
@@ -23,6 +24,8 @@ require_once QA_INCLUDE_DIR.'qa-app-posts.php';
 
 // require __DIR__.'/init.inc.php';
 Model::$db = $db = qa_db_connection();
+$log = new ErrorLog();
+Model::$log = $log;
 
 // check user perm
 if (($userid = qa_get_logged_in_userid()) == null) {
@@ -57,8 +60,11 @@ $where = [
   'type='. ZhihuFetch::TA,
   "state=$cur_cate",
 ];
-$entry_list = ZhihuFetch::sqlBuilder()->where($where)->limit($limit)->getAll();
-$total      = ZhihuFetch::sqlBuilder()->where($where)->count();
+$entry_list = ZhihuFetch::sqlBuilder()->where($where)
+  ->select(["COUNT(*) c","username"])
+  ->groupBy(['username'])
+  ->limit($limit)->getAll();
+$total      = ZhihuFetch::sqlBuilder()->where($where)->count('DISTINCT username');
 
 $_inner_tpl_ = 'audit.php';
 include ROOT.'/view/layout.php';
