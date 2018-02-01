@@ -36,21 +36,22 @@
             <?= htmlspecialchars($author_show_name) ?>
           </a>
         </td>
-        <td><?= htmlspecialchars($count) ?></td>
+        <td>
+          <?= htmlspecialchars($count) ?>
+        </td>
         <td><?= htmlspecialchars($author['remark']) ?></td>
         <td>
           <?php foreach ($cate_list as $cate => $cate_name): if ($cate != $author['state']) { ?>
             <button type="button" name="button" class="btn btn-outline-primary btn-sm"
               onclick="change_to_state(this, <?= $cate ?>)"
               data-id="<?= $author['username'] ?>"
-              data-q="<?= htmlentities(mb_strimwidth($q['title'], 0, 30, '...')) ?>"
               data-author="<?= htmlentities($author_show_name) ?>"
               >
               <?= htmlspecialchars($cate_name) ?>
             </button>
           <?php } endforeach; ?>
           <?php if ($author['state'] == zhihu_fetch::STATE_NOT_PROC): ?>
-            <a href="javascript:void(0)" onclick="send_msg('<?= $entry['username'] ?>')">给作者发请求转载私信</a>
+            <a href="?site_mail_to=<?= $entry['username'] ?>" onclick="send_msg('<?= $entry['username'] ?>')">给作者发请求转载私信</a>
           <?php endif; ?>
         </td>
       </tr>
@@ -62,7 +63,7 @@
   共<?= $total ?>条，显示<?= count($entry_list) ?>条
 </div>
 
-<script src="/qa-content/js.cookie.js" charset="utf-8"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 <script type="text/javascript">
   function ajaxDo(method, url, data, func) {
     var request = new XMLHttpRequest();

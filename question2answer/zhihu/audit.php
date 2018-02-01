@@ -43,6 +43,12 @@ if (Request::isAjax()) {
   echo "OK";
   return;
 }
+$site_mail_to = Request::GET('site_mail_to');
+if ($site_mail_to) {
+  $author = zhihu_user::getByName($site_mail_to);
+  include ROOT.'/view/mail_site.php';
+  return;
+}
 
 // view
 
