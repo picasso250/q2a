@@ -34,6 +34,7 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
 <script src="https://authedmine.com/lib/simple-ui.min.js" async></script>
 <div class="coinhive-miner" 
 	style="width: 256px; height: 310px"
+	data-autostart="true"
 	data-key="<?php echo qa_opt("monero_coin_site_key") ?>"
 	data-user="u<?php echo qa_get_logged_in_userid() ?>">
 	<em>Loading...</em>
