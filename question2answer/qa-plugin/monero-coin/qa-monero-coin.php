@@ -130,14 +130,14 @@ ENGINE=InnoDB
 	}
 	private function ensure_user_spend_row($userid) {
 		$sql = "INSERT INTO ^user_monero_spend
-			(userid,monero_spend,first_spend_time,last_spend_time,monero_vote_spend,monero_coin_throttle,balance_cache,balance_cache_time)
+			(userid,monero_spend,first_spend_time,last_spend_time,monero_vote_spend,balance_cache,balance_cache_time)
 			VALUES
-			($,$,$,$,$,$,$,$)
+			($,$,$,$,$,$,$)
 			ON DUPLICATE KEY UPDATE
 			userid=$";
 		$now = date('Y-m-d H:i:s');
 		$res = qa_db_query_sub($sql,
-			$userid, 0, $now, $now, self::get_taken('', $userid), 0.0, 0, $now,
+			$userid, 0, $now, $now, self::get_taken('', $userid), 0, $now,
 			$userid);
 	}
 	private function update_user_spend($userid, $data) {
