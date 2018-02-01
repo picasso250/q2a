@@ -36,6 +36,7 @@ class SqlBuilder
   private $_where = [];
   private $_having = [];
   private $_order_by = "";
+  private $_group_by = "";
   private $_limit = 100;
   private $_offset = 0;
 
@@ -122,6 +123,10 @@ class SqlBuilder
     $this->_having = [ $where_str, $where_params ];
     return $this;
   }
+  public function groupBy(array $fields) {
+    $this->_group_by = implode(",", array_map('lib\\_add_quote', $fields));
+    return $this;
+  }
   public function orderBy(array $fields) {
     $order_by_str_arr = [];
     foreach ($fields as $field => $sort) {
@@ -165,9 +170,18 @@ class SqlBuilder
       $where = "WHERE $where_str";
       $where_params = $this->_where[1];
     }
+    $having = "";
+    $having_params = [];
+    if ($this->_having) {
+      $having_str = $this->_having[0];
+      $having = "WHERE $having_str";
+      $having_params = $this->_having[1];
+    }
+    $group_by = $this->_group_by ? "GROUP BY $this->_group_by" : "";
     $order_by = $this->_order_by ? "ORDER BY $this->_order_by" : "";
     return [
-      "SELECT $this->_select FROM $this->_from $join $where $order_by LIMIT $this->_limit OFFSET $this->_offset",
+      "SELECT $this->_select FROM $this->_from $join $where $group_by $order_by $having
+        LIMIT $this->_limit OFFSET $this->_offset",
       $where_params
     ];
   }
