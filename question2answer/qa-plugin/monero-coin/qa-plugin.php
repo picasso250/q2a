@@ -41,3 +41,4 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
 
 
 qa_register_plugin_module('page', 'qa-monero-coin.php', 'qa_monero_coin', 'Monero Coin');
+qa_register_plugin_phrases('qa-monero-coin-lang-*.php', 'monero_coin');

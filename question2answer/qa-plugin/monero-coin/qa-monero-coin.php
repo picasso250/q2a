@@ -158,7 +158,7 @@ ENGINE=InnoDB
 	{
 		$qa_content=qa_content_prepare();
 
-		$qa_content['title']=qa_lang_html('example_page/page_title');
+		$qa_content['title']=qa_lang_html('monero_coin/page_title');
 		require_once QA_INCLUDE_DIR.'qa-app-users.php';
 
 		if (qa_get_logged_in_userid() === null) {
@@ -183,12 +183,6 @@ ENGINE=InnoDB
 				} else {
 					$data['monero_vote_spend'] = $my_monero_vote_spend;
 				}
-				$mining_throttle = floatval(qa_post_text('my_monero_mining_throttle'));
-				if ($mining_throttle < 0 || $mining_throttle > 1) {
-					$error_vote_spend = "mining throttle must between 0 and 1";
-				} else {
-					$data['monero_coin_throttle'] = $mining_throttle;
-				}
 				if ($data)
 					$this->update_user_spend(qa_get_logged_in_userid(), $data);
 			}
@@ -208,12 +202,6 @@ ENGINE=InnoDB
 						'tags' => 'name="my_monero_vote_spend"',
 						'value' => qa_html($us['monero_vote_spend']),
 						'error' => qa_html($error_vote_spend),
-					),
-					'my_monero_mining_throttle' => array(
-						'label' => 'CPU throttle when mining',
-						'tags' => 'name="my_monero_mining_throttle"',
-						'value' => qa_html($us['monero_coin_throttle']),
-						'error' => qa_html($error_throttle),
 					),
 				),
 				'buttons' => array(

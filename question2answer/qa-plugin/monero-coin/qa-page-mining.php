@@ -29,34 +29,12 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
   last_spend_time: <?php echo $us ? $us['last_spend_time'] : '' ?>
 </div>
 
-<h3>You are mining...</h3>
-<div >hashesPerSecond: <span id="hashesPerSecond"></span></div>
-<div >totalHashes: <span id="totalHashes"></span></div>
-<div >acceptedHashes: <span id="acceptedHashes"></span></div>
-<script src="https://coinhive.com/lib/coinhive.min.js"></script>
-<script>
-var miner = new CoinHive.User("<?php echo qa_opt("monero_coin_site_key") ?>", "u<?php echo qa_get_logged_in_userid() ?>", {throttle: <?php echo $us["monero_coin_throttle"] ?>});
+<h3>Mine</h3>
 
-// Only start on non-mobile devices and if not opted-out
-// in the last 14400 seconds (4 hours):
-if (!miner.isMobile() && !miner.didOptOut(14400)) {
-miner.start();
-}
-</script>
-<script>
-// Listen on events
-miner.on('found', function() { /* Hash found */ })
-miner.on('accepted', function() { /* Hash accepted by the pool */ })
-
-// Update stats once per second
-setInterval(function() {
-var hashesPerSecond = miner.getHashesPerSecond();
-var totalHashes = miner.getTotalHashes();
-var acceptedHashes = miner.getAcceptedHashes();
-$('#hashesPerSecond').text(hashesPerSecond);
-$('#totalHashes').text(totalHashes);
-$('#acceptedHashes').text(acceptedHashes);
-
-}, 1000);
-
-</script>
+<script src="https://authedmine.com/lib/simple-ui.min.js" async></script>
+<div class="coinhive-miner" 
+	style="width: 256px; height: 310px"
+	data-key="<?php echo qa_opt("monero_coin_site_key") ?>"
+	data-user="u<?php echo qa_get_logged_in_userid() ?>">
+	<em>Loading...</em>
+</div>
