@@ -52,7 +52,7 @@ ENGINE=InnoDB";
 			require_once QA_INCLUDE_DIR.'db/maxima.php';
 
 			$ret[] = "CREATE TABLE `^user_monero_vote` (
-	`id` INT(10) UNSIGNED NOT NULL,
+	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`userid` ".qa_get_mysql_user_column_type().",
 	`postid` BIGINT(20) UNSIGNED NOT NULL,
 	`vote` BIGINT(20) NOT NULL,

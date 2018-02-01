@@ -28,7 +28,7 @@ function _monero_update_user_spend($userid, $data) {
 }
 
 function _monero_get_user_balance_with_cache($userid, $us = null) {
-  $cache_time = 300;
+  $cache_time = 30;
   if (!$us)
     $us = _monero_get_user_spend($userid);
   $balance_cache_time = $us['balance_cache_time'];
