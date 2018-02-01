@@ -8,6 +8,7 @@ class Model
 {
   public static $db_getter;
   public static $db;
+  public static $log;
   public static function db() {
     if (self::$db) {
       return self::$db;
@@ -35,6 +36,7 @@ class Model
   public static function sqlBuilder($as = "") {
     $sb = new SqlBuilder(self::db());
     $sb->from(self::table(), $as);
+    if (self::$log) $sb->log = self::$log;
     return $sb;
   }
 
