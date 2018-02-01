@@ -26,7 +26,7 @@ ALTER TABLE `qa_contentwords`
 		`aid` BIGINT(20) UNSIGNED NOT NULL,
 		`title` TEXT NOT NULL,
 		`detail` LONGTEXT NOT NULL,
-		`comment` VARCHAR(255) NOT NULL COMMENT '管理员备注',
+		`remark` VARCHAR(255) NOT NULL COMMENT '管理员备注',
 		`edit_time` DATETIME NOT NULL,
 		`fetch_time` DATETIME NOT NULL,
 		PRIMARY KEY (`id`)
