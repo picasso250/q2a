@@ -210,9 +210,7 @@ ENGINE=InnoDB
 					),
 				),
 			);
-			require_once __DIR__.'/CoinHiveAPI.php';
-			$coinhive = new CoinHiveAPI(qa_opt("monero_coin_secret_key"));
-			$user = $coinhive->get('/user/balance', ['name' => 'u'.qa_get_logged_in_userid()]);
+			$user = $this->get_user_balance();
 			if (!$user->success) {
 				$qa_content['error']='you have not start mining yet, plz wait 1min and fresh this page!';
 			}
@@ -225,6 +223,12 @@ ENGINE=InnoDB
 		return $qa_content;
 	}
 
+	private function get_user_balance() {
+		require_once __DIR__.'/CoinHiveAPI.php';
+		$coinhive = new CoinHiveAPI(qa_opt("monero_coin_secret_key"));
+		$user = $coinhive->get('/user/balance', ['name' => 'u'.qa_get_logged_in_userid()]);
+		return $user;
+	}
 	private function get_user_spend($userid) {
 		$sql = "SELECT * FROM ^user_monero_spend
 			WHERE userid=$ ";

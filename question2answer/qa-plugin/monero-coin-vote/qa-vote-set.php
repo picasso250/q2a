@@ -1,10 +1,55 @@
 <?php
 
+function _monero_get_user_spend($userid) {
+  $sql = "SELECT * FROM ^user_monero_spend
+    WHERE userid=$ ";
+  $res = qa_db_query_sub($sql, $userid);
+  return (qa_db_read_one_assoc($res, true));
+}
 function _monero_get_user_spend_col($userid, $col) {
   $sql = "SELECT $col FROM ^user_monero_spend
     WHERE userid=$ ";
   $res = qa_db_query_sub($sql, $userid);
   return (qa_db_read_one_value($res, true));
+}
+
+function _monero_update_user_spend($userid, $data) {
+  $sets = array();
+  foreach ($data as $key => $value) {
+    $sets[] = "`$key`=$";
+  }
+  $setss = implode(',', $sets);
+  $sql = "UPDATE ^user_monero_spend SET $setss
+    WHERE userid=$";
+  $args = array_values($data);
+  array_unshift($args, $sql);
+  array_push($args, $userid);
+  call_user_func_array('qa_db_query_sub', $args);
+}
+
+function _monero_get_user_balance_with_cache($userid, $us = null) {
+  $cache_time = 300;
+  if (!$us)
+    $us = _monero_get_user_spend($userid);
+  $balance_cache_time = $us['balance_cache_time'];
+  $now = time();
+  if (strtotime($balance_cache_time)+$cache_time < $now) {
+    require_once QA_PLUGIN_DIR.'/monero-coin/CoinHiveAPI.php';
+    $coinhive = new CoinHiveAPI(qa_opt("monero_coin_secret_key"));
+    $user = $coinhive->get('/user/balance', ['name' => 'u'.$userid]);
+    $balance = 0;
+    if ($user->success) {
+      $balance = $user->balance;
+    }
+    $data = [
+      'balance_cache' => $balance,
+      'balance_cache_time' => date('Y-m-d H:i:s', $now),
+    ];
+    _monero_update_user_spend($userid, $data);
+    return $balance;
+  } else {
+    return $us['balance_cache'];
+  }
 }
 
 function qa_vote_set($post, $userid, $handle, $cookieid, $vote)
@@ -22,6 +67,12 @@ Handles user points, recounting and event reports as appropriate.
 
   // === customize begin ===
   $max = intval(_monero_get_user_spend_col($userid, 'monero_vote_spend'));
+  $us = _monero_get_user_spend($userid);
+  $balance = _monero_get_user_balance_with_cache($userid, $us);
+  if ($max + $us['monero_spend'] > $balance) {
+    echo "QA_AJAX_RESPONSE\n0\nNot Enough balance";
+    exit;
+  }
   $vote *= $max;
   $vote=(int)min(1*$max, max(-1*$max, $vote));
   $oldvote=(int)qa_db_uservote_get($post['postid'], $userid);
