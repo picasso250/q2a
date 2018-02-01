@@ -194,9 +194,9 @@ class SqlBuilder
           $arr[] = $mm;
         }
       }
+      $params = [];
       if ($arr) {
         $type_arr = [];
-        $params = [];
         foreach ($arr as $key) {
           $v = $data[$key];
           // do not support big int
@@ -224,10 +224,41 @@ class SqlBuilder
       } else {
         $this->stmt = $this->_db->prepare($this->sql);
       }
+      $this->_full_sql = self::_get_full_sql_question_mark($this->sql, $params);
+      if ($this->log) {
+        $this->log->INFO("%s", $this->_full_sql);
+      }
       return $this->stmt->execute();
+    }
+    // Pdo
+    $this->_full_sql = self::_get_full_sql_auto_detect($this->sql, $params);
+    if ($this->log) {
+      $this->log->INFO("%s", $this->_full_sql);
     }
     $this->stmt = $this->_db->prepare($this->sql);
     return $this->stmt->execute($params);
+  }
+  private static function _get_full_sql_auto_detect($sql, $params) {
+    if (strpos($sql, '?')!== false) {
+      return self::_get_full_sql_question_mark($sql, $params);
+    }
+    return self::_get_full_sql_colon($sql, $params);
+  }
+  private static function _get_full_sql_colon($sql, $params) {
+    return \preg_replace_callback('/:([\w_]+)/', function ($m) use($params) {
+      $index = $m[1];
+      return "'$params[$index]'";
+    }, $sql);
+  }
+  private static function _get_full_sql_question_mark($sql, $params) {
+    $indicator_list_str = \array_shift($params);
+    $n = \strlen($indicator_list_str);
+    for ($i=0; $i < $n; $i++) { 
+      $ii = \strpos($sql, '?');
+      $v = $indicator_list_str[$i] == 's' ? "'$params[$i]'" : $params[$i];
+      $sql = \substr_replace($sql, $v, $ii, 1);
+    }
+    return $sql;
   }
   public function update($data) {
     $_set_str_arr = [];
