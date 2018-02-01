@@ -199,6 +199,7 @@ class SqlBuilder
         }
         array_unshift($params, implode('', $type_arr));
         $sql = preg_replace("/:[\w_]+/", '?', $this->sql);
+        $this->sql = $sql;
         $this->stmt = $this->_db->prepare($sql);
         if ($this->stmt == false) {
           return false;
