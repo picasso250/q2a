@@ -8,6 +8,9 @@ use mysqli;
 use InvalidArgumentException;
 
 function _add_quote($key) {
+  if (strpos($key, "(")) {
+    return $key;
+  }
   if (strpos($key, ".")) {
     return implode(".", array_map("lib\\_add_quote", explode(".", $key)));
   }
