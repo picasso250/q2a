@@ -39,7 +39,7 @@ if (!($logged_in_level >= QA_USER_LEVEL_ADMIN)) {
 if (Request::isAjax()) {
   $new_state = Request::POST("change_to_state");
   $id = Request::POST("id");
-  zhihu_fetch::editById($id, ['state' => $new_state]);
+  zhihu_user::editById($id, ['state' => $new_state]);
   echo "OK";
   return;
 }
@@ -57,14 +57,10 @@ $cate_list = [
 
 $limit = 100;
 $where = [
-  'type='. ZhihuFetch::TA,
   "state=$cur_cate",
 ];
-$entry_list = ZhihuFetch::sqlBuilder()->where($where)
-  ->select(["COUNT(*) c","username"])
-  ->groupBy(['username'])
-  ->limit($limit)->getAll();
-$total      = ZhihuFetch::sqlBuilder()->where($where)->count('DISTINCT username');
+$entry_list = zhihu_user::sqlBuilder()->where($where)->limit($limit)->getAll();
+$total      = zhihu_user::sqlBuilder()->where($where)->count();
 
 $_inner_tpl_ = 'audit.php';
 include ROOT.'/view/layout.php';

@@ -119,7 +119,7 @@ foreach ($answer_list as $answer) {
       if (!$ok) {
         echo "addQuestion sql error\n";
         echo ZhihuFetch::$_sqlb->sql,"\n";
-        var_dump(ZhihuFetch::$_sqlb->stmt->errno);
+        var_dump(ZhihuFetch::$_sqlb->stmt);
         exit(1);
       }
       $zqid = $db->insert_id;
@@ -138,7 +138,7 @@ foreach ($answer_list as $answer) {
     }
     if (preg_match("#/people/(.+)#", $answer->uhref, $m)) {
       $username = $m[1];
-      $zu = ZhihuUser::sqlBuilder()->where([
+      $zu = zhihu_user::sqlBuilder()->where([
         ['username', $username]
       ])->getOne();
       if ($zu) {
@@ -149,7 +149,7 @@ foreach ($answer_list as $answer) {
         $userid = User::add([
           'handle' => $author_name,
         ]);
-        ZhihuUser::sqlBuilder()->insert([
+        zhihu_user::sqlBuilder()->insert([
           'userid' => $userid,
           'username' => $username,
           'showname' => $author_name,

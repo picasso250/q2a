@@ -93,20 +93,25 @@ class zhihu_fetch extends ZhihuFetch {
   const STATE_HAVE_REPUB = 2;
   const STATE_ABANDON = 3;
   const STATE_AUTHOR_REFUSE = 4;
-  public static function countByCate($cate) {
-    return self::sqlBuilder()->where(["state=$cate"])->count();
+  
+  static function countAnswerByUsername($username) {
+    $where = [
+      "type=".zhihu_fetch::TA,
+      "username=$username",
+    ];
+    return zhihu_fetch::sqlBuilder()->where($where)->count();
   }
 }
 
-class ZhihuUser extends Model
-{
+class zhihu_user extends Model {
   static $table = 'zhihu_user';
-}
-class zhihu_user extends ZhihuUser {
   static function getByName($name) {
     return self::sqlBuilder()->where([
       ['username',$name],
     ])->getOne();
+  }
+  public static function countByCate($cate) {
+    return self::sqlBuilder()->where(["state=$cate"])->count();
   }
 }
 

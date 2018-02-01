@@ -3,7 +3,7 @@
 <div class="ml-1" style="margin:10px;">
   <?php foreach ($cate_list as $cate => $cate_name): ?>
     <a href="?state=<?= $cate ?>" class="ml-1 btn <?= $cate == $cur_cate ? 'btn-primary' : 'btn-light' ?>">
-      <?= htmlspecialchars($cate_name) ?> <span class="badge badge-light"><?= zhihu_fetch::countByCate($cate) ?></span>
+      <?= htmlspecialchars($cate_name) ?> <span class="badge badge-light"><?= zhihu_user::countByCate($cate) ?></span>
     </a>
   <?php endforeach; ?>
 </div>
@@ -25,7 +25,8 @@
   </thead>
   <tbody>
     <?php foreach ($entry_list as $key => $entry):
-      $author = zhihu_user::getByName($entry['username']);
+      $count = zhihu_fetch::countAnswerByUsername($entry['username']);
+      $author = $entry;
       $author_show_name = ($author['showname']);
       ?>
       <tr>
@@ -35,7 +36,7 @@
             <?= htmlspecialchars($author_show_name) ?>
           </a>
         </td>
-        <td><?= htmlspecialchars($entry['c']) ?></td>
+        <td><?= htmlspecialchars($count) ?></td>
         <td><?= htmlspecialchars($author['remark']) ?></td>
         <td>
           <?php foreach ($cate_list as $cate => $cate_name): if ($cate != $author['state']) { ?>
