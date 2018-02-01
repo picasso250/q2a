@@ -152,8 +152,8 @@ class SqlBuilder
     }
     return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
   }
-  public function count() {
-    $this->_select = "COUNT(*) c";
+  public function count($fields = '*') {
+    $this->_select = "COUNT($fields) c";
     $row = $this->getOne();
     return $row['c'];
   }
