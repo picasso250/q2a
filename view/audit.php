@@ -37,7 +37,19 @@
           </a>
         </td>
         <td>
-          <?= htmlspecialchars($count) ?>
+          <strong><?= htmlspecialchars($count) ?></strong>
+          <?php $answer_list = zhihu_fetch::getAnswerByUsername($entry['username']); ?>
+          <ul>
+            <?php foreach ($answer_list as $answer): $question = zhihu_fetch::getQuestionByZhihuId($answer['qid']) ?>
+              <li>
+                <a target="_blank" href="https://www.zhihu.com/question/<?= $answer['qid'] ?>/answer/<?= $answer['aid'] ?>/">
+                  <?= htmlspecialchars(mb_strimwidth(strip_tags($question['title']), 0, 50, "...")) ?>
+                  :
+                  <?= htmlspecialchars(mb_strimwidth(strip_tags($answer['detail']), 0, 50, "...")) ?>
+                </a>
+              </li>
+            <?php endforeach ?>
+          </ul>
         </td>
         <td><?= htmlspecialchars($author['remark']) ?></td>
         <td>

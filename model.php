@@ -97,6 +97,19 @@ class zhihu_fetch extends ZhihuFetch {
     ];
     return zhihu_fetch::sqlBuilder()->where($where)->count();
   }
+  static function getAnswerByUsername($username) {
+    $where = [
+      "type=".zhihu_fetch::TA,
+      "username=$username",
+    ];
+    return zhihu_fetch::sqlBuilder()->where($where)->getAll();
+  }
+  static function getQuestionByZhihuId($id) {
+    $where = [
+      "qid=$id",
+    ];
+    return zhihu_fetch::sqlBuilder()->where($where)->getOne();
+  }
 }
 
 class zhihu_user extends Model {
