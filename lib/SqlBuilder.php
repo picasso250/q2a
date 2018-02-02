@@ -230,14 +230,14 @@ class SqlBuilder
       }
       $this->_full_sql = self::_get_full_sql_question_mark($this->sql, $params);
       if ($this->log) {
-        $this->log->INFO("%s", $this->_full_sql);
+        $this->log->INFO("SQL: %s", $this->_full_sql);
       }
       return $this->stmt->execute();
     }
     // Pdo
     $this->_full_sql = self::_get_full_sql_auto_detect($this->sql, $params);
     if ($this->log) {
-      $this->log->INFO("%s", $this->_full_sql);
+      $this->log->INFO("SQL: %s", $this->_full_sql);
     }
     $this->stmt = $this->_db->prepare($this->sql);
     return $this->stmt->execute($params);
