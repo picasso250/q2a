@@ -214,6 +214,7 @@ ENGINE=InnoDB
 			if (!$user->success) {
 				$qa_content['error']='you have not start mining yet, plz start it, wait 1min and fresh this page!';
 			}
+			$user_get = $this->get_user_get(qa_get_logged_in_userid());
 			ob_start();
 			include __DIR__.'/qa-page-mining.php';
 			$str = ob_get_clean();
@@ -223,6 +224,13 @@ ENGINE=InnoDB
 		return $qa_content;
 	}
 
+	private function get_user_get($userid) {
+		$sql = "SELECT sum(vote) from ^user_monero_vote v
+			join qa_posts p on p.postid=v.postid
+			where p.userid=# and v.vote > 0";
+		$res = qa_db_query_sub($sql, $userid);
+		return qa_db_read_one_value($res);
+	}
 	private function get_user_balance() {
 		require_once __DIR__.'/CoinHiveAPI.php';
 		$coinhive = new CoinHiveAPI(qa_opt("monero_coin_secret_key"));

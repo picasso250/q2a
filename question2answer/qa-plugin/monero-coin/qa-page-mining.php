@@ -5,7 +5,7 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
 }
 ?>
 
-<h3>Account</h3>
+<h3>Account(Remote)</h3>
 <?php if ($user->success): ?>
 <div class="">
   name: <?php echo $user->name ?>
@@ -21,15 +21,20 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
 </div>
 <?php endif ?>
 
-<h3>Spend</h3>
+<h3>Account(Local)</h3>
 <div class="">
   monero_spend: <?php echo $us ? $us['monero_spend'] : '0' ?> Hash
 </div>
 <div class="">
   last_spend_time: <?php echo $us ? $us['last_spend_time'] : '' ?>
 </div>
+
 <div class="">
-  monero_left: <?php echo $user->success && $us ? ($user->balance-$us['monero_spend']) : '?' ?>
+	monero_get: <?php echo $user->success && $us ? $user_get : '?' ?>
+</div>
+<div class="">
+  monero_left: <?php echo $user->success && $us ? ($user->balance + $user_get - $us['monero_spend']) : '?' ?>
+	<a href="#">WithDraw</a>
 </div>
 
 <h3>Mine</h3>
