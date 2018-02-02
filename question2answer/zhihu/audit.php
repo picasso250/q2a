@@ -14,6 +14,8 @@ require ROOT."/vendor/autoload.php";
 require ROOT."/lib/autoload.php";
 require (ROOT)."/model.php";
 
+env_load(dirname(dirname(__DIR__)));
+
 require_once PUB_ROOT.'/qa-include/qa-base.php';
 require_once QA_INCLUDE_DIR.'qa-app-users.php';
 require_once QA_INCLUDE_DIR.'qa-app-posts.php';

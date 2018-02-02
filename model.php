@@ -47,6 +47,14 @@ class ZhihuFetch extends Model
 
   static $_sqlb;
   static $table = 'zhihu_fetch';
+}
+class zhihu_fetch extends ZhihuFetch {
+  const STATE_NOT_PROC = 0;
+  const STATE_WAIT_REPLY = 1;
+  const STATE_HAVE_REPUB = 2;
+  const STATE_ABANDON = 3;
+  const STATE_AUTHOR_REFUSE = 4;
+  
   static function getAnswerOne($where)
   {
     $w = array_merge([ ['type', zhihu_fetch::TA] ], $where);
@@ -82,14 +90,6 @@ class ZhihuFetch extends Model
     $sqlb = self::sqlBuilder();
     return $ok = $sqlb->insert($d);
   }
-}
-class zhihu_fetch extends ZhihuFetch {
-  const STATE_NOT_PROC = 0;
-  const STATE_WAIT_REPLY = 1;
-  const STATE_HAVE_REPUB = 2;
-  const STATE_ABANDON = 3;
-  const STATE_AUTHOR_REFUSE = 4;
-  
   static function countAnswerByUsername($username) {
     $where = [
       "type=".zhihu_fetch::TA,
@@ -126,6 +126,52 @@ class zhihu_user extends Model {
   }
   public static function countByCate($cate) {
     return self::sqlBuilder()->where(["state=$cate"])->count();
+  }
+  // 导入分两种
+  // 1. 暂时不愿意来我们网站的
+  // 2. 来网站注册的
+  public static function importByAuthor($user) {
+    self::importUser($user);
+    self::importAnswerAll($user);
+  }
+  public static function importAnswerAll($user) {
+    $answer_list = zhihu_fetch::getAnswerByUsername($user['username']);
+    foreach ($answer_list as $key => $answer) {
+      self::importAns($answer, $username, $user['userid']);
+    }
+  }
+  public static function importUser($zhihu_user) {
+    $userid = qa_get_logged_in_userid();
+    zhihu_user::editById($zhihu_user['id'], ['userid' => $userid]);
+  }
+  public static function importAns($answer, $username, $userid = null) {
+    $post_qid = self::importQuestion($answer['qid']);
+    self::importAnswer($post_qid, $answer['aid'], $userid);
+  }
+  public static function importQuestion($qid) {
+    $q = zhihu_fetch::getQuestionOne(['qid'=>$qid]);
+    if ($q['postid']) return $q['postid'];
+    $post_qid = Post::addQuestion(['title'=>$q['title'], 'content' => $q['detail']]);
+    zhihu_fetch::editById($q['id'], ['postid' => $post_qid]);
+    return $post_qid;
+  }
+  public static function importAnswer($post_qid, $aid, $userid = null) {
+    if ($userid === null) {
+      $userid = $_ENV['zhihu_fetch_user_id'];
+    }
+    $q = zhihu_fetch::getAnswerOne(['aid' => $aid]);
+    if ($q['postid']) {
+      Post::editById($q['postid'], ['userid' => $userid]);
+      return $q['postid'];
+    }
+    $data = [
+      'parentid' => $post_qid,
+      'content' => $q['detail'],
+      'userid' => $userid,
+    ];
+    $postid = Post::addAnswer($data);
+    zhihu_fetch::editById($q['id'], ['postid' => $postid]);
+    return $postid;
   }
 }
 

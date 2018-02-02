@@ -1,14 +1,18 @@
 <h1>欢迎 <?= htmlspecialchars($author['showname']) ?> 前来注册 多知乎</h1>
 
-<div class="ml-1" style="margin:10px;">
-  <?php foreach ($cate_list as $cate => $cate_name): ?>
-    <a href="?state=<?= $cate ?>" class="ml-1 btn <?= $cate == $cur_cate ? 'btn-primary' : 'btn-light' ?>">
-      <?= htmlspecialchars($cate_name) ?> <span class="badge badge-light"><?= zhihu_user::countByCate($cate) ?></span>
-    </a>
-  <?php endforeach; ?>
-</div>
-
-<div class="alert alert-warning text-center pagination-centered" id="undo_box" style="display:none;">
-  <span id="undo_box_msg"></span>
-  <a href="javascript:void(0);" onclick="undo()" class="btn btn-warning btn-sm">撤销</a>
+<div class="">
+  您是大V。我们看上的回答有:
+  <ul>
+    <?php foreach ($answer_list as $answer): $question = zhihu_fetch::getQuestionByZhihuId($answer['qid']) ?>
+      <li>
+        <a target="_blank" href="https://www.zhihu.com/question/<?= $answer['qid'] ?>/answer/<?= $answer['aid'] ?>/">
+          <?= htmlspecialchars(strip_tags($question['title'])) ?>
+          <br>
+          <?= htmlspecialchars(mb_strimwidth(strip_tags($answer['detail']), 0, 90, "...")) ?>
+        </a>
+      </li>
+    <?php endforeach ?>
+  </ul>
+  如您同意注册，则同意将以上回答转载到此网站。
+  <a href="/?qa=register&<?= http_build_query(['to' => $back_url]) ?>">去注册</a>
 </div>
