@@ -75,21 +75,22 @@
   共<?= $total ?>条，显示<?= count($entry_list) ?>条
 </div>
 
-<div class="modal" tabindex="-1" role="dialog" id="msgM">
+<!-- Modal -->
+<div class="modal fade" id="msgM" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Modal title</h5>
+        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <pre></pre>
+        <textarea style="width:100%;height:500px;"></textarea>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary">Save changes</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
@@ -171,9 +172,9 @@
   }
   function send_msg(username) {
     $('#msgM').modal();
-    $('#msgM .modal-body pre').text('loading...');
+    $('#msgM .modal-body textarea').text('loading...');
     $.get('?site_mail_to='+username, function(ret) {
-      $('#msgM .modal-body pre').text(ret);
+      $('#msgM .modal-body textarea').text(ret);
     });
   }
 </script>
