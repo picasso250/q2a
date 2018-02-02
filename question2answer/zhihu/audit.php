@@ -36,6 +36,14 @@ if (!($logged_in_level >= QA_USER_LEVEL_ADMIN)) {
   die("no permission");
 }
 
+$site_mail_to = Request::GET('site_mail_to');
+if ($site_mail_to) {
+  $author = zhihu_user::getByName($site_mail_to);
+  $answer_list = zhihu_fetch::getAnswerByUsername($site_mail_to);
+  include ROOT.'/view/mail_site.php';
+  return;
+}
+
 if (Request::isAjax()) {
   $new_state = Request::POST("change_to_state");
   $id = Request::POST("id");
@@ -43,12 +51,7 @@ if (Request::isAjax()) {
   echo "OK";
   return;
 }
-$site_mail_to = Request::GET('site_mail_to');
-if ($site_mail_to) {
-  $author = zhihu_user::getByName($site_mail_to);
-  include ROOT.'/view/mail_site.php';
-  return;
-}
+
 
 // view
 

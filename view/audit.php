@@ -63,7 +63,7 @@
             </button>
           <?php } endforeach; ?>
           <?php if ($author['state'] == zhihu_fetch::STATE_NOT_PROC): ?>
-            <a href="?site_mail_to=<?= $entry['username'] ?>" onclick="send_msg('<?= $entry['username'] ?>')">给作者发请求转载私信</a>
+            <a href="javascript:void(0)" onclick="send_msg('<?= $entry['username'] ?>')">给作者发请求转载私信</a>
           <?php endif; ?>
         </td>
       </tr>
@@ -73,6 +73,26 @@
 
 <div class="">
   共<?= $total ?>条，显示<?= count($entry_list) ?>条
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="msgM">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre></pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
@@ -147,6 +167,13 @@
         // We reached our target server, but it returned an error
         alert("error");
       }
+    });
+  }
+  function send_msg(username) {
+    $('#msgM').modal();
+    $('#msgM .modal-body pre').text('loading...');
+    $.get('?site_mail_to='+username, function(ret) {
+      $('#msgM .modal-body pre').text(ret);
     });
   }
 </script>
