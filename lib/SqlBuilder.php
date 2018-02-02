@@ -45,6 +45,7 @@ class SqlBuilder
 
   public $sql;
   public $stmt;
+  public $log;
 
   public function __construct($db) {
     $this->_db = $db;
