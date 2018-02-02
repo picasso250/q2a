@@ -8,3 +8,9 @@
 
 *.log
 /vendor/
+
+/fetch.sql
+/fetch.zip
+/lib/cookie.txt
+/script/coll*.html
+.env
