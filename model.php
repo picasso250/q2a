@@ -68,8 +68,6 @@ class ZhihuFetch extends Model
       'aid' => 0,
       'fetch_time' => MysqlUtil::timestamp(),
       'edit_time' => MysqlUtil::timestamp(),
-      'state' => 0,
-      "comment" => "",
     ], $data);
     self::$_sqlb = self::sqlBuilder();
     return $ok = self::$_sqlb->insert($d);
@@ -80,8 +78,6 @@ class ZhihuFetch extends Model
       'type' => self::TA,
       'title' => "",
       'fetch_time' => MysqlUtil::timestamp(),
-      'state' => 0,
-      "comment" => "",
     ], $data);
     $sqlb = self::sqlBuilder();
     return $ok = $sqlb->insert($d);
