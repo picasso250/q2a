@@ -248,7 +248,7 @@ ENGINE=InnoDB";
 		$this->set_cache($userid, $balance);
 		return $balance;
 	}
-	public static function get_taken($event, $userid) {
+	public static function get_taken() {
 		return intval(qa_opt("monero_coin_exchange_ratio"));
 	}
 
