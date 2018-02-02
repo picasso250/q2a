@@ -153,7 +153,7 @@ class zhihu_user extends Model {
     self::importAnswer($post_qid, $answer['aid'], $userid);
   }
   public static function importQuestion($qid) {
-    $q = zhihu_fetch::getQuestionOne(['qid'=>$qid]);
+    $q = zhihu_fetch::getQuestionOne(["qid=$qid"]);
     if ($q['postid']) return $q['postid'];
     $post_qid = Post::addQuestion(['title'=>$q['title'], 'content' => $q['detail']]);
     zhihu_fetch::editById($q['id'], ['postid' => $post_qid]);
@@ -163,7 +163,7 @@ class zhihu_user extends Model {
     if ($userid === null) {
       $userid = $_ENV['zhihu_fetch_user_id'];
     }
-    $q = zhihu_fetch::getAnswerOne(['aid' => $aid]);
+    $q = zhihu_fetch::getAnswerOne(["aid = $aid"]);
     if ($q['postid']) {
       Post::editById($q['postid'], ['userid' => $userid]);
       return $q['postid'];
