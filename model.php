@@ -106,6 +106,11 @@ class zhihu_user extends Model {
       ['username',$name],
     ])->getOne();
   }
+  static function getBySalt($salt) {
+    return self::sqlBuilder()->where([
+      ['salt',$salt],
+    ])->getOne();
+  }
   public static function countByCate($cate) {
     return self::sqlBuilder()->where(["state=$cate"])->count();
   }
