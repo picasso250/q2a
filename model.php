@@ -137,12 +137,16 @@ class zhihu_user extends Model {
   public static function importAnswerAll($user) {
     $answer_list = zhihu_fetch::getAnswerByUsername($user['username']);
     foreach ($answer_list as $key => $answer) {
-      self::importAns($answer, $username, $user['userid']);
+      self::importAns($answer, $user['username'], $user['userid']);
     }
   }
   public static function importUser($zhihu_user) {
     $userid = qa_get_logged_in_userid();
-    zhihu_user::editById($zhihu_user['id'], ['userid' => $userid]);
+    $data = [
+      'userid' => $userid,
+      'is_register' => 1,
+    ];
+    zhihu_user::editById($zhihu_user['id'], $data);
   }
   public static function importAns($answer, $username, $userid = null) {
     $post_qid = self::importQuestion($answer['qid']);

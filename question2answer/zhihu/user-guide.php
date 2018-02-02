@@ -35,8 +35,9 @@ if (!$author)
 
 $after_register = Request::GET('after_register');
 if ($after_register) {
+  $db->begin_transaction();
   zhihu_user::importByAuthor($author);
-  zhihu_user::editById($author['id'], ['is_register' => 1]);
+  $db->commit();
   Response::redirect("/");
   return;
 }
@@ -44,7 +45,7 @@ if ($after_register) {
 $answer_list = zhihu_fetch::getAnswerByUsername($author['username']);
 
 $back_url_data = ['u'=>$salt, 'after_register'=>1];
-$back_url = '/zhihu/user-guide.php?'.http_build_query($back_url_data);
+$back_url = 'zhihu/user-guide.php?'.http_build_query($back_url_data);
 
 $page_title = '用户指引';
 $_inner_tpl_ = 'user-guide.php';
