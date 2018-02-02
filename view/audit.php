@@ -86,7 +86,11 @@
         </button>
       </div>
       <div class="modal-body">
-        <textarea style="width:100%;height:500px;"></textarea>
+        <div class="">
+          <a href="" target="_blank" id="userLink">
+          </a>
+        </div>
+        <textarea style="width:100%;height:400px;"></textarea>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -97,18 +101,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+<script src="audit.js"></script>
 <script type="text/javascript">
-  function ajaxDo(method, url, data, func) {
-    var request = new XMLHttpRequest();
-    request.open(method, url, true);
-    request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-    request.onload = func;
-    if (data) {
-      request.send(data);
-    } else {
-      request.send();
-    }
-  }
   var MAP_STATE = <?= json_encode($cate_list) ?>;
   function change_to_state(elem, new_state) {
     var yes = confirm("确实要把 "+elem.getAttribute('data-author')+" 对 "+elem.getAttribute('data-q')+" 的回答改为 "+MAP_STATE[new_state]+" 状态吗？");
@@ -136,45 +130,5 @@
   var undo_id = Cookies.get('undo');
   if (undo_id && undo_id != "0") {
     show_undo();
-  }
-  function show_undo() {
-    var id = Cookies.get('undo');
-    var undo_text = Cookies.get('undo_text');
-    var old_state = Cookies.get('old_state');
-    document.getElementById('undo_box_msg').textContent = "您刚刚更改了 "+undo_text;
-    var undo_box = document.getElementById('undo_box');
-    undo_box.style.display = '';
-    setTimeout(function() {
-      undo_box.style.display = 'none';
-      Cookies.set('undo', "");
-    }, 5000);
-  }
-  function undo() {
-    var id = Cookies.get('undo');
-    Cookies.set('undo', "");
-    var undo_text = Cookies.get('undo_text');
-    var old_state = Cookies.get('old_state');
-    var data = [
-      "change_to_state="+ encodeURIComponent(old_state),
-      "id="+ encodeURIComponent(id),
-    ];
-    ajaxDo('POST', '?ajax', data.join("&"), function() {
-      if (this.status >= 200 && this.status < 400) {
-        // Success!
-        var resp = this.responseText;
-        alert(resp);
-        location.href = "?state="+old_state;
-      } else {
-        // We reached our target server, but it returned an error
-        alert("error");
-      }
-    });
-  }
-  function send_msg(username) {
-    $('#msgM').modal();
-    $('#msgM .modal-body textarea').text('loading...');
-    $.get('?site_mail_to='+username, function(ret) {
-      $('#msgM .modal-body textarea').text(ret);
-    });
   }
 </script>
