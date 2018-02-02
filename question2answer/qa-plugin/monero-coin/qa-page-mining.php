@@ -28,6 +28,9 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
 <div class="">
   last_spend_time: <?php echo $us ? $us['last_spend_time'] : '' ?>
 </div>
+<div class="">
+  monero_left: <?php echo $user->success && $us ? ($user->balance-$us['monero_spend']) : '?' ?>
+</div>
 
 <h3>Mine</h3>
 
