@@ -140,9 +140,7 @@ foreach ($answer_list as $answer) {
         $userid = $zu['userid'];
       } else {
         echo "push user $username\n";
-        $userid = User::add([
-          'handle' => $author_name,
-        ]);
+        $userid = 0;
         zhihu_user::sqlBuilder()->insert([
           'userid' => $userid,
           'username' => $username,
