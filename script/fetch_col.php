@@ -102,13 +102,7 @@ foreach ($answer_list as $answer) {
         echo "begin_transaction fail\n";
         exit(1);
       }
-
-      $pqid = Post::addQuestion([
-        'title' => $title,
-        'content' => preg_replace(IMG_ROOT_URL_OLD, IMG_ROOT_URL, $detail),
-      ]);
-      echo "add Q=$pqid\n";
-
+      $pqid = 0;
       $ok = ZhihuFetch::addQuestion([
         'postid' => $pqid,
         'title' => $title,
