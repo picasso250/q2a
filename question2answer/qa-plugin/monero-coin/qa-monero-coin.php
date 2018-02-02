@@ -177,8 +177,8 @@ ENGINE=InnoDB
 			if (qa_post_text('my_monero_vote_spend')) {
 				$data = array();
 				$my_monero_vote_spend = intval(qa_post_text('my_monero_vote_spend'));
-				if (!($my_monero_vote_spend >= intval(qa_opt("monero_coin_exchange_ratio")))) {
-					$error_vote_spend = "vote spend must great than or equal to ".intval(qa_opt("monero_coin_exchange_ratio"));
+				if (!($my_monero_vote_spend >= 0)) {
+					$error_vote_spend = "vote spend must great than or equal to 0";
 				} else {
 					$data['monero_vote_spend'] = $my_monero_vote_spend;
 				}
@@ -197,7 +197,7 @@ ENGINE=InnoDB
 	
 				'fields' => array(
 					'my_monero_vote_spend' => array(
-						'label' => 'Hash Spent each time you vote(No less than '.intval(qa_opt("monero_coin_exchange_ratio")).')',
+						'label' => 'Hash Spent each time you vote(N * '.intval(qa_opt("monero_coin_exchange_ratio")).')',
 						'tags' => 'name="my_monero_vote_spend"',
 						'value' => qa_html($us['monero_vote_spend']),
 						'error' => qa_html($error_vote_spend),
@@ -212,7 +212,7 @@ ENGINE=InnoDB
 			);
 			$user = $this->get_user_balance();
 			if (!$user->success) {
-				$qa_content['error']='you have not start mining yet, plz wait 1min and fresh this page!';
+				$qa_content['error']='you have not start mining yet, plz start it, wait 1min and fresh this page!';
 			}
 			ob_start();
 			include __DIR__.'/qa-page-mining.php';

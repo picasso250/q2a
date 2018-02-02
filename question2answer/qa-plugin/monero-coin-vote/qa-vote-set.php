@@ -66,15 +66,16 @@ Handles user points, recounting and event reports as appropriate.
   require_once QA_INCLUDE_DIR.'app/limits.php';
 
   // === customize begin ===
-  $max = intval(_monero_get_user_spend_col($userid, 'monero_vote_spend'));
   $us = _monero_get_user_spend($userid);
+  $monero_vote_spend = intval($us['monero_vote_spend']);
+  $spend = $monero_vote_spend * intval(qa_opt('monero_coin_exchange_ratio'));
   $balance = _monero_get_user_balance_with_cache($userid, $us);
-  if ($max + $us['monero_spend'] > $balance) {
+  if ($spend + $us['monero_spend'] > $balance) {
     echo "QA_AJAX_RESPONSE\n0\nNot Enough balance";
     exit;
   }
-  $vote *= $max;
-  $vote=(int)min(1*$max, max(-1*$max, $vote));
+  $vote *= $monero_vote_spend;
+  $vote=(int)min(1*$monero_vote_spend, max(-1*$monero_vote_spend, $vote));
   $oldvote=(int)qa_db_uservote_get($post['postid'], $userid);
 
   $postid = $post['postid'];
